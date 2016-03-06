@@ -9,6 +9,10 @@ namespace KSTAR.Models
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
+        public DbSet<FGroup> Groups { get; set; }
+        public DbSet<FSubject> Subjects { get; set; }
+        public DbSet<FTopic> Topics { get; set; }
+        public DbSet<FPost> Posts { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
