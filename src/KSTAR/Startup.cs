@@ -11,6 +11,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using KSTAR.Models;
 using KSTAR.Services;
+using Microsoft.AspNet.Authentication.Cookies;
+using Microsoft.AspNet.Authentication.OAuth;
+using Microsoft.Extensions.WebEncoders;
+using Microsoft.AspNet.Http;
+using Microsoft.AspNet.Authentication.Google;
 
 namespace KSTAR
 {
@@ -49,6 +54,7 @@ namespace KSTAR
                 .AddDefaultTokenProviders();
 
             services.AddMvc();
+            services.AddAuthentication(options => options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme);
 
             // Add application services.
             services.AddTransient<IEmailSender, AuthMessageSender>();
@@ -83,6 +89,34 @@ namespace KSTAR
                 }
                 catch { }
             }
+            // https://console.developers.google.com/project
+            app.UseGoogleAuthentication(options =>
+            {
+                options.ClientId = Configuration["Authentification:Google:ClientId"];
+                options.ClientSecret = Configuration["Authentification:Google:ClientSecret"];
+                options.Events = new OAuthEvents()
+                {
+                    OnRemoteError = ctx =>
+
+                    {
+                        ctx.Response.Redirect("/error?ErrorMessage=" + UrlEncoder.Default.UrlEncode(ctx.Error.Message));
+                        ctx.HandleResponse();
+                        return Task.FromResult(0);
+                    }
+                };
+
+            });
+            //app.UseOAuthAuthentication(new OAuthOptions
+            //{
+            //    AuthenticationScheme = "Google-AccessToken",
+            //    DisplayName = "Google-AccessToken",
+            //    ClientId = "560027070069-37ldt4kfuohhu3m495hk2j4pjp92d382.apps.googleusercontent.com",
+            //    ClientSecret = "n2Q-GEw9RQjzcRbU3qhfTj8f",
+            //    CallbackPath = new PathString("/signin-google-token"),
+            //    AuthorizationEndpoint = GoogleDefaults.AuthorizationEndpoint,
+            //    TokenEndpoint = GoogleDefaults.TokenEndpoint,
+            //    Scope = { "openid", "profile", "email" }
+            //});
 
             app.UseIISPlatformHandler(options => options.AuthenticationDescriptions.Clear());
 
