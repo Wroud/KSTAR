@@ -16,6 +16,7 @@ using Microsoft.AspNet.Authentication.OAuth;
 using Microsoft.Extensions.WebEncoders;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Authentication.Google;
+using Microsoft.AspNet.Identity;
 
 namespace KSTAR
 {
@@ -49,12 +50,19 @@ namespace KSTAR
                 .AddDbContext<ApplicationDbContext>(options =>
                     options.UseSqlServer(Configuration["Data:DefaultConnection:ConnectionString"]));
 
-            services.AddIdentity<ApplicationUser, IdentityRole>()
+            services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+            {
+                options.Password.RequireDigit = false;
+                options.Password.RequireNonLetterOrDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
+                options.User.AllowedUserNameCharacters += "абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
+            })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
             services.AddMvc();
-            services.AddAuthentication(options => options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme);
+            //services.AddAuthentication(options => options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme);
 
             // Add application services.
             services.AddTransient<IEmailSender, AuthMessageSender>();
@@ -89,40 +97,23 @@ namespace KSTAR
                 }
                 catch { }
             }
+            app.UseIISPlatformHandler(options => options.AuthenticationDescriptions.Clear());
+
+            app.UseStaticFiles();
+            app.UseIdentity();
+            //app.UseCookieAuthentication(options =>
+            //{
+            //options.AutomaticAuthenticate = true;
+            //options.AutomaticChallenge = true;
+            //options.LoginPath = new PathString("/Account/Login");
+            //});
             // https://console.developers.google.com/project
             app.UseGoogleAuthentication(options =>
             {
                 options.ClientId = Configuration["Authentification:Google:ClientId"];
                 options.ClientSecret = Configuration["Authentification:Google:ClientSecret"];
-                options.Events = new OAuthEvents()
-                {
-                    OnRemoteError = ctx =>
-
-                    {
-                        ctx.Response.Redirect("/error?ErrorMessage=" + UrlEncoder.Default.UrlEncode(ctx.Error.Message));
-                        ctx.HandleResponse();
-                        return Task.FromResult(0);
-                    }
-                };
-
             });
-            //app.UseOAuthAuthentication(new OAuthOptions
-            //{
-            //    AuthenticationScheme = "Google-AccessToken",
-            //    DisplayName = "Google-AccessToken",
-            //    ClientId = "560027070069-37ldt4kfuohhu3m495hk2j4pjp92d382.apps.googleusercontent.com",
-            //    ClientSecret = "n2Q-GEw9RQjzcRbU3qhfTj8f",
-            //    CallbackPath = new PathString("/signin-google-token"),
-            //    AuthorizationEndpoint = GoogleDefaults.AuthorizationEndpoint,
-            //    TokenEndpoint = GoogleDefaults.TokenEndpoint,
-            //    Scope = { "openid", "profile", "email" }
-            //});
 
-            app.UseIISPlatformHandler(options => options.AuthenticationDescriptions.Clear());
-
-            app.UseStaticFiles();
-
-            app.UseIdentity();
 
             // To configure external authentication please see http://go.microsoft.com/fwlink/?LinkID=532715
 

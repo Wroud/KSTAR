@@ -1,0 +1,17 @@
+﻿@using KSTAR.ViewComponents
+@model List<BreadcumbRoute>
+<ol class="breadcrumb">
+    @foreach (var item in Model)
+    {
+        if (!item.Active)
+        {
+            <li>
+                <a href="@item.Url">@item.Name</a>
+            </li>
+        }
+        else
+        {
+            <li class="active">@item.Name</li>
+        }
+    }
+</ol>

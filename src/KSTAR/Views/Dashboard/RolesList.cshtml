@@ -1,0 +1,55 @@
+﻿@model IEnumerable<KSTAR.Models.ApplicationRole>
+
+@{
+    ViewData["Title"] = "RolesList";
+}
+
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Cписок групп</h1>
+    </div>
+</div>
+<table class="table table-bordered sorted_table">
+    <thead>
+        <tr>
+            <th>
+                Название
+            </th>
+            <th>
+                Участники
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+
+    @foreach (var item in Model)
+    {
+        <tr data-id="@item.Id">
+            <td>
+                <a asp-action="RolesList" asp-route-id="@item.Id">@Html.DisplayFor(modelItem => item.Name)</a>
+            </td>
+            <td>
+                @item.Users.Where(u => u.RoleId == item.Id).Count()
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+    }
+</table>
+@section Scripts{
+    <script type="text/javascript">
+        $('.sorted_table').sortable({
+            containerSelector: 'table',
+            itemPath: '> tbody',
+            itemSelector: 'tr',
+            placeholder: '<tr class="placeholder"/>',
+            onDrop: function ($item, container, _super, event) {
+                $item.removeClass(container.group.options.draggedClass).removeAttr("style")
+                $("body").removeClass(container.group.options.bodyClass)
+            }
+        });
+    </script>
+}
