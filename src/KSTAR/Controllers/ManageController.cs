@@ -13,7 +13,7 @@ using KSTAR.ViewModels.Manage;
 
 namespace KSTAR.Controllers
 {
-    [Authorize]
+    [Authorize(Policy = "NotBanned")]
     public class ManageController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;

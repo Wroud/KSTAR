@@ -8,10 +8,17 @@ using Microsoft.AspNet.Authorization;
 using KSTAR.ViewModels.Account;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
+using Microsoft.Data.Entity;
+using System.Security.Claims;
 
 namespace KSTAR.Controllers
 {
-    [Authorize]
+    public struct UserWithRole
+    {
+        public ApplicationUser User;
+        public ApplicationRole Role;
+    }
+    [Authorize("NotBanned"), Authorize("Dashboard")]
     public class DashboardController : Controller
     {
         private ApplicationDbContext _context;
@@ -30,13 +37,15 @@ namespace KSTAR.Controllers
 
         public IActionResult UsersList()
         {
-            return View(_context.ApplicationUser.ToList());
+            ViewBag.Context = _context;
+            ViewBag.Roles = _context.ApplicationRole.ToList();
+            return View(_context.ApplicationUser.Include(c => c.Roles).ToList());
         }
         public IActionResult RolesList(string id)
         {
             if (id == null)
             {
-                return View(_context.ApplicationRole.OrderByDescending(r => r.Priority).ToList());
+                return View(_context.ApplicationRole.OrderByDescending(r => r.Priority).Include(r => r.Users).ToList());
             }
             else
             {
@@ -98,7 +107,47 @@ namespace KSTAR.Controllers
             }
             return View(model);
         }
-
+        public async Task<IActionResult> AddUserToRole(string id, string uid)
+        {
+            var role = await _context.ApplicationRole.SingleOrDefaultAsync(r => r.Id == id);
+            var user = await _context.ApplicationUser.SingleOrDefaultAsync(u => u.Id == uid);
+            if (role != null && user != null)
+            {
+                var result = await _userManager.AddToRoleAsync(user, role.Name);
+                if (result.Succeeded)
+                {
+                    return RedirectToAction(nameof(UsersList));
+                }
+            }
+            return RedirectToAction(nameof(UsersList), new { ErrorMessage = "Не удалось добавить пользователя в группу" });
+        }
+        public async Task<IActionResult> RoleAddClaim(string id, string name)
+        {
+            var role = await _context.ApplicationRole.Include(r => r.Claims).SingleOrDefaultAsync(r => r.Id == id);
+            if (role != null && role.Claims.Where(c => c.ClaimType == name && c.ClaimValue == "true").Count() == 0)
+            {
+                var result = await _roleManager.AddClaimAsync(role, new Claim(name, "true"));
+                if (result.Succeeded)
+                {
+                    return RedirectToAction(nameof(RolesList), new { id = id });
+                }
+            }
+            return RedirectToAction(nameof(RolesList), new { id = id, ErrorMessage = "Не добавить правило" });
+        }
+        public async Task<IActionResult> RemoveUserFromRole(string id, string uid)
+        {
+            var role = await _context.ApplicationRole.SingleOrDefaultAsync(r => r.Id == id);
+            var user = await _context.ApplicationUser.SingleOrDefaultAsync(u => u.Id == uid);
+            if (role != null && user != null)
+            {
+                var result = await _userManager.RemoveFromRoleAsync(user, role.Name);
+                if (result.Succeeded)
+                {
+                    return RedirectToAction(nameof(UsersList));
+                }
+            }
+            return RedirectToAction(nameof(UsersList), new { ErrorMessage = "Не удалось исключить пользователя из группы" });
+        }
         public IActionResult Contact()
         {
             ViewData["Message"] = "Your contact page.";

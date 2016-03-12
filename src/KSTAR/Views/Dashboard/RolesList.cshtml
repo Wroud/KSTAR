@@ -9,7 +9,7 @@
         <h1 class="page-header">Cписок групп</h1>
     </div>
 </div>
-<table class="table table-bordered sorted_table">
+<table class="table table-bordered">
     <thead>
         <tr>
             <th>
@@ -29,7 +29,7 @@
                 <a asp-action="RolesList" asp-route-id="@item.Id">@Html.DisplayFor(modelItem => item.Name)</a>
             </td>
             <td>
-                @item.Users.Where(u => u.RoleId == item.Id).Count()
+                @Html.Raw(item.Users.Count())
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
@@ -41,7 +41,7 @@
 </table>
 @section Scripts{
     <script type="text/javascript">
-        $('.sorted_table').sortable({
+        /*$('.sorted_table').sortable({
             containerSelector: 'table',
             itemPath: '> tbody',
             itemSelector: 'tr',
@@ -50,6 +50,6 @@
                 $item.removeClass(container.group.options.draggedClass).removeAttr("style")
                 $("body").removeClass(container.group.options.bodyClass)
             }
-        });
+        });*/
     </script>
 }

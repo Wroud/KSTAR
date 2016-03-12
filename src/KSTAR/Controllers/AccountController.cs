@@ -12,9 +12,10 @@ using System.Threading.Tasks;
 
 namespace KSTAR.Controllers
 {
-    [Authorize]
+    [Authorize("NotBanned")]
     public class AccountController : Controller
     {
+        private readonly ApplicationDbContext _context;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
@@ -24,6 +25,7 @@ namespace KSTAR.Controllers
         private readonly IUserClaimsPrincipalFactory<ApplicationUser> _claimsFactory;
 
         public AccountController(
+            ApplicationDbContext context,
             RoleManager<ApplicationRole> roleManager,
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
@@ -32,6 +34,7 @@ namespace KSTAR.Controllers
             ILoggerFactory loggerFactory,
             IUserClaimsPrincipalFactory<ApplicationUser> claimsFactory)
         {
+            _context = context;
             _roleManager = roleManager;
             _userManager = userManager;
             _signInManager = signInManager;
@@ -39,6 +42,12 @@ namespace KSTAR.Controllers
             _smsSender = smsSender;
             _logger = loggerFactory.CreateLogger<AccountController>();
             _claimsFactory = claimsFactory;
+        }
+
+        [AllowAnonymous]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
 
         //
@@ -108,10 +117,10 @@ namespace KSTAR.Controllers
             if (ModelState.IsValid)
             {
                 var user = new ApplicationUser { UserName = model.Name, Email = model.Email };
-                var result = await _userManager.AddToRoleAsync(user, "User");
+                var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
-                    result = await _userManager.CreateAsync(user, model.Password);
+                    result = await _userManager.AddToRoleAsync(user, "User");
                     if (result.Succeeded)
                     {
                         //_roleManager.
@@ -172,6 +181,9 @@ namespace KSTAR.Controllers
             }
             // Sign in the user with this external login provider if the user already has a login.
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false);
+
+            //var user = _context.ApplicationUser.Single((ui) => ui.Id == _context.UserLogins.Single((u) => u.LoginProvider == info.LoginProvider && u.ProviderKey == info.ProviderKey).UserId);
+            //await _userManager.AddToRoleAsync(user, "Administrator");
             if (result.Succeeded)
             {
                 _logger.LogInformation(5, "User logged in with {Name} provider.", info.LoginProvider);

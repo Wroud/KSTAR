@@ -63,6 +63,14 @@ namespace KSTAR
 
             services.AddMvc();
             //services.AddAuthentication(options => options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme);
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("Dashboard", policy => policy.RequireClaim("Dashboard","true"));
+                options.AddPolicy("ManageGlobalSettings", policy => policy.RequireClaim("ManageGlobalSettings", "true"));
+                options.AddPolicy("ManageUsers", policy => policy.RequireClaim("ManageUsers", "true"));
+                options.AddPolicy("ManageRoles", policy => policy.RequireClaim("ManageRoles", "true"));
+                options.AddPolicy("NotBanned", policy => policy.RequireClaim("Banned", "false"));
+            });
 
             // Add application services.
             services.AddTransient<IEmailSender, AuthMessageSender>();
@@ -88,11 +96,9 @@ namespace KSTAR
                 // For more details on creating database during deployment see http://go.microsoft.com/fwlink/?LinkID=615859
                 try
                 {
-                    using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>()
-                        .CreateScope())
+                    using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
                     {
-                        serviceScope.ServiceProvider.GetService<ApplicationDbContext>()
-                             .Database.Migrate();
+                        serviceScope.ServiceProvider.GetService<ApplicationDbContext>().Database.Migrate();
                     }
                 }
                 catch { }

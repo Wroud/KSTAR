@@ -6,11 +6,11 @@ using KSTAR.Models;
 
 namespace KSTAR.Controllers
 {
-    public class FGroupsController : Controller
+    public class ForumController : Controller
     {
         private ApplicationDbContext _context;
 
-        public FGroupsController(ApplicationDbContext context)
+        public ForumController(ApplicationDbContext context)
         {
             _context = context;    
         }

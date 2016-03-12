@@ -13,7 +13,7 @@ namespace KSTAR.ViewComponents
         public string Name;
         public bool Active;
         public Apply _Name;
-        public BreadcumbRoute(string name = "Index",string url="/", Apply _name = null)
+        public BreadcumbRoute(string name = "Index", string url = "/", Apply _name = null)
         {
             Name = name;
             Url = url;
@@ -49,7 +49,9 @@ namespace KSTAR.ViewComponents
             },
             { "/Dashboard/AddRole", new BreadcumbRoute(name:"Добавить группу")},
             { "/Dashboard/UsersList", new BreadcumbRoute(name:"Список пользователей")},
-            { "/Dashboard/AddUser", new BreadcumbRoute(name:"Добавить пользователя")}
+            { "/Dashboard/AddUser", new BreadcumbRoute(name:"Добавить пользователя")},
+
+            { "/Forum", new BreadcumbRoute(name:"Форум")},
         };
         private ApplicationDbContext _context;
         public BreadcrumbViewComponent(ApplicationDbContext context)
@@ -91,9 +93,12 @@ namespace KSTAR.ViewComponents
                 }
 
             }
-            var ro = data[data.Count - 1];
-            ro.Active = true;
-            data[data.Count - 1] = ro;
+            if (data.Count > 0)
+            {
+                var ro = data[data.Count - 1];
+                ro.Active = true;
+                data[data.Count - 1] = ro;
+            }
             return View(data);
         }
     }

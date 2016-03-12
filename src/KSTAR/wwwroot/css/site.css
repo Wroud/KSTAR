@@ -417,3 +417,18 @@ table.dataTable thead .sorting_desc_disabled {
         .panel-yellow a:hover {
             color: #df8a13;
         }
+
+
+
+
+
+.nav > li.nav-key > a:last-child {
+    margin-right: 37px;
+}
+
+.nav > li.nav-key > a:first-child {
+    float: right;
+    width: 37px;
+    padding: 10px;
+        text-align: center;
+}
