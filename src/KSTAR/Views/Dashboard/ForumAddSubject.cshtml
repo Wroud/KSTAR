@@ -1,0 +1,53 @@
+@model KSTAR.Models.FSubject
+
+@{
+    ViewData["Title"] = "AddForumSubject";
+}
+
+<div class="row">
+    <div class="col-lg-12">
+        <h3 class="page-header">@ViewData["Title"]. <br /> <small>Create a new forum group.</small></h3>
+    </div>
+</div>
+<form asp-action="ForumAddSubject">
+    <div class="form-horizontal">
+        <div asp-validation-summary="ValidationSummary.ModelOnly" class="text-danger"></div>
+        <div class="form-group">
+            <label asp-for="Icon" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <input asp-for="Icon" class="form-control" />
+                <span asp-validation-for="Icon" class="text-danger" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="Title" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="Description" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="GroupID" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <select asp-for="GroupID" asp-items="ViewBag.Groups" class="form-control" ></select>
+                <span asp-validation-for="GroupID" class="text-danger" />
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Create" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

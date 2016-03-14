@@ -17,6 +17,7 @@ using Microsoft.Extensions.WebEncoders;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Authentication.Google;
 using Microsoft.AspNet.Identity;
+using KSTAR.Managers;
 
 namespace KSTAR
 {
@@ -65,7 +66,7 @@ namespace KSTAR
             //services.AddAuthentication(options => options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme);
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("Dashboard", policy => policy.RequireClaim("Dashboard","true"));
+                options.AddPolicy("Dashboard", policy => policy.RequireClaim("Dashboard", "true"));
                 options.AddPolicy("ManageGlobalSettings", policy => policy.RequireClaim("ManageGlobalSettings", "true"));
                 options.AddPolicy("ManageUsers", policy => policy.RequireClaim("ManageUsers", "true"));
                 options.AddPolicy("ManageRoles", policy => policy.RequireClaim("ManageRoles", "true"));
@@ -75,6 +76,7 @@ namespace KSTAR
             // Add application services.
             services.AddTransient<IEmailSender, AuthMessageSender>();
             services.AddTransient<ISmsSender, AuthMessageSender>();
+            services.AddScoped<ForumManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -88,6 +90,12 @@ namespace KSTAR
                 app.UseBrowserLink();
                 app.UseDeveloperExceptionPage();
                 app.UseDatabaseErrorPage();
+
+                using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+                {
+                    serviceScope.ServiceProvider.GetService<ApplicationDbContext>().Database.Migrate();
+                    serviceScope.ServiceProvider.GetService<ApplicationDbContext>().EnsureSeedData();
+                }
             }
             else
             {
@@ -99,6 +107,7 @@ namespace KSTAR
                     using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
                     {
                         serviceScope.ServiceProvider.GetService<ApplicationDbContext>().Database.Migrate();
+                        serviceScope.ServiceProvider.GetService<ApplicationDbContext>().EnsureSeedData();
                     }
                 }
                 catch { }
@@ -128,6 +137,14 @@ namespace KSTAR
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
+                routes.MapRoute(
+                    name: "forum_subject",
+                    template: "Forum/{subject}",
+                    defaults: new { controller = "Forum", action = "Subject", haction = true });
+                routes.MapRoute(
+                    name: "forum_topic",
+                    template: "Forum/{subject}/{id}",
+                    defaults: new { controller = "Forum", action = "Topic", haction = true });
             });
         }
 

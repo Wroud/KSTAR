@@ -1,0 +1,57 @@
+﻿@model FTopic
+
+<div class="content-box content-breadcrumb">
+    @Component.Invoke("Breadcrumb")
+</div>
+
+<div class="content-box forum-container">
+    <div class="media">
+        <div class="media-left">
+            <div class="media-avatar">
+                <a href="#">
+                    <img class="media-object" src="@Model.User.ForumUser.Avatar" alt="@Model.User.ForumUser.Name">
+                </a>
+                <div class="media-comments">
+                    <i class="glyphicon glyphicon-comment"></i> @Model.User.ForumTopic.Count
+                    <i class="fa fa-comments-o"></i> @Model.User.ForumPost.Count
+                    <i class="fa fa-star"></i> @Model.User.ForumUser.Reputation
+                </div>
+            </div>
+        </div>
+        <div class="media-body">
+            <div class="media-meta">
+                <div class="pull-right date">
+                    <i class="fa fa-comments-o"></i> @Model.Post.Count
+                    <i class="fa fa-eye"></i> @Model.ViewCount
+                    <i class="fa fa-calendar"></i> @Model.Date
+                </div>
+                <a href="#">@Model.User.ForumUser.Name</a>
+            </div>
+            <h4 class="media-heading">
+                @Model.Title
+                <br />
+                <small>@Model.Description</small>
+            </h4>
+            @Html.Raw(Model.Message)
+        </div>
+    </div>
+    @foreach (var post in Model.Post)
+    {
+        <div class="media">
+            <div class="media-left">
+                <a href="#">
+                    <img class="media-object" src="@post.User.Avatar" alt="@post.User.UserName">
+                </a>
+                <h4>@post.User.UserName</h4>
+                <div>
+                    <i class="fa fa-comments-o"></i> @post.User.ForumPost.Count
+                    <i class="fa fa-calendar"></i> @post.User.RegisterDate
+                </div>
+            </div>
+            <div class="media-body">
+                <div class="pull-right"><i class="fa fa-calendar"></i> @post.Date</div>
+                @Html.Raw(post.Message)
+            </div>
+        </div>
+    }
+</div>

@@ -120,7 +120,7 @@ namespace KSTAR.Controllers
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
-                    result = await _userManager.AddToRoleAsync(user, "User");
+                    result = await _userManager.AddToRoleAsync(user, BaseRoles.User.ToString());
                     if (result.Succeeded)
                     {
                         //_roleManager.
@@ -146,6 +146,7 @@ namespace KSTAR.Controllers
         //
         // POST: /Account/LogOff
         [HttpPost]
+        [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> LogOff()
         {
@@ -228,11 +229,11 @@ namespace KSTAR.Controllers
                 {
                     return View("ExternalLoginFailure");
                 }
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
-                var result = await _userManager.AddToRoleAsync(user, "User");
+                var user = new ApplicationUser { UserName = model.Name, Email = model.Email };
+                var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
-                    result = await _userManager.CreateAsync(user);
+                    result = await _userManager.AddToRoleAsync(user, BaseRoles.User.ToString());
                     if (result.Succeeded)
                     {
                         result = await _userManager.AddLoginAsync(user, info);

@@ -39,6 +39,26 @@ namespace KSTAR.ViewComponents
         {
             route.Name = context.ApplicationRole.SingleOrDefault((r) => r.Id == (value as string)).Name;
         }
+        private static void FSu(ref BreadcumbRoute route, ApplicationDbContext context, object value)
+        {
+            route.Name = value as string;
+        }
+        private static void FT(ref BreadcumbRoute route, ApplicationDbContext context, object value)
+        {
+            route.Name = context.ForumTopic.SingleOrDefault((r) => r.ID == int.Parse(value as string)).Title;
+        }
+        private static void DET(ref BreadcumbRoute route, ApplicationDbContext context, object value)
+        {
+            route.Name = context.ForumTopic.SingleOrDefault((r) => r.ID == int.Parse(value as string)).Title;
+        }
+        private static void DEG(ref BreadcumbRoute route, ApplicationDbContext context, object value)
+        {
+            route.Name = context.ForumGroup.SingleOrDefault((r) => r.ID == int.Parse(value as string)).Title;
+        }
+        private static void DES(ref BreadcumbRoute route, ApplicationDbContext context, object value)
+        {
+            route.Name = context.ForumSubject.SingleOrDefault((r) => r.ID == int.Parse(value as string)).Title;
+        }
         private static Dictionary<string, BreadcumbRoute> Routes = new Dictionary<string, BreadcumbRoute>()
         {
             { "/Dashboard", new BreadcumbRoute(name:"Dashboard")},
@@ -51,7 +71,22 @@ namespace KSTAR.ViewComponents
             { "/Dashboard/UsersList", new BreadcumbRoute(name:"Список пользователей")},
             { "/Dashboard/AddUser", new BreadcumbRoute(name:"Добавить пользователя")},
 
+            { "/Dashboard/ForumListGroup", new BreadcumbRoute(name: "Список групп форума") },
+            { "/Dashboard/ForumAddGroup", new BreadcumbRoute(name: "Добавление группы форума") },
+            { "/Dashboard/ForumEditGroup", new BreadcumbRoute(name: "Редактирование группы форума") },
+            { "/Dashboard/ForumEditGroup/id", new BreadcumbRoute(_name: DEG) },
+            { "/Dashboard/ForumListSubject", new BreadcumbRoute(name: "Список разделов форума") },
+            { "/Dashboard/ForumAddSubject", new BreadcumbRoute(name: "Добавление раздела форума") },
+            { "/Dashboard/ForumEditSubject", new BreadcumbRoute(name: "Редактирование раздела форума") },
+            { "/Dashboard/ForumEditSubject/id", new BreadcumbRoute(_name: DES) },
+            { "/Dashboard/ForumListTopic", new BreadcumbRoute(name: "Список тем форума") },
+            { "/Dashboard/ForumAddTopic", new BreadcumbRoute(name: "Добавление темы форума") },
+            { "/Dashboard/ForumEditTopic", new BreadcumbRoute(name: "Редактирование темы форума") },
+            { "/Dashboard/ForumEditTopic/id", new BreadcumbRoute(_name:DET) },
+
             { "/Forum", new BreadcumbRoute(name:"Форум")},
+            { "/Forum/subject", new BreadcumbRoute(name:"Форум",_name:FSu)},
+            { "/Forum/subject/id", new BreadcumbRoute(name:"Форум",_name:FT)},
         };
         private ApplicationDbContext _context;
         public BreadcrumbViewComponent(ApplicationDbContext context)
@@ -64,20 +99,34 @@ namespace KSTAR.ViewComponents
             var data = new List<BreadcumbRoute>();
             string path = "";
             string url = "";
+
+            path += "/" + RouteData.Values["controller"] as string;
+            url += "/" + RouteData.Values["controller"] as string;
+            if (Routes.ContainsKey(path))
+            {
+                var r = Routes[path];
+                r.Url = url;
+                data.Add(r);
+            }
+
+            if (!RouteData.Values.ContainsKey("haction"))
+            {
+                path += "/" + RouteData.Values["action"] as string;
+                url += "/" + RouteData.Values["action"] as string;
+                if (Routes.ContainsKey(path))
+                {
+                    var r = Routes[path];
+                    r.Url = url;
+                    data.Add(r);
+                }
+            }
+
             foreach (var route in RouteData.Values)
             {
                 switch (route.Key)
                 {
                     case "controller":
                     case "action":
-                        path += "/" + route.Value as string;
-                        url += "/" + route.Value as string;
-                        if (Routes.ContainsKey(path))
-                        {
-                            var r = Routes[path];
-                            r.Url = url;
-                            data.Add(r);
-                        }
                         break;
                     default:
                         path += "/" + route.Key as string;

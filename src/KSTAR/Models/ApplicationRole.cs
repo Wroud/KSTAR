@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace KSTAR.Models
 {
+    public enum BaseRoles
+    {
+        Administrator, User
+    }
     public class ApplicationRole : IdentityRole
     {
         public int Priority { get; set; }

@@ -3,118 +3,39 @@ using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.Rendering;
 using Microsoft.Data.Entity;
 using KSTAR.Models;
+using KSTAR.Managers;
+using System.Collections.Generic;
 
 namespace KSTAR.Controllers
 {
     public class ForumController : Controller
     {
         private ApplicationDbContext _context;
+        private ForumManager _forumManager;
 
-        public ForumController(ApplicationDbContext context)
+        public ForumController(ApplicationDbContext context, ForumManager forumManager)
         {
-            _context = context;    
+            _context = context;
+            _forumManager = forumManager;
         }
 
         // GET: FGroups
         public IActionResult Index()
         {
-            return View(_context.Groups.ToList());
+            return View(_forumManager.GetGroupWithRelated().ToList());
         }
 
-        // GET: FGroups/Details/5
-        public IActionResult Details(int? id)
+        public IActionResult Subject(string subject)
         {
-            if (id == null)
-            {
-                return HttpNotFound();
-            }
-
-            FGroup fGroup = _context.Groups.Single(m => m.ID == id);
-            if (fGroup == null)
-            {
-                return HttpNotFound();
-            }
-
-            return View(fGroup);
+            return View(_forumManager.GetTopicWithRelated().Where(t => t.Subject.Title == subject).OrderByDescending(t => t.Active).ToList());
         }
 
-        // GET: FGroups/Create
-        public IActionResult Create()
+        public IActionResult Topic(int id)
         {
-            return View();
-        }
-
-        // POST: FGroups/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Create(FGroup fGroup)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Groups.Add(fGroup);
-                _context.SaveChanges();
-                return RedirectToAction("Index");
-            }
-            return View(fGroup);
-        }
-
-        // GET: FGroups/Edit/5
-        public IActionResult Edit(int? id)
-        {
-            if (id == null)
-            {
-                return HttpNotFound();
-            }
-
-            FGroup fGroup = _context.Groups.Single(m => m.ID == id);
-            if (fGroup == null)
-            {
-                return HttpNotFound();
-            }
-            return View(fGroup);
-        }
-
-        // POST: FGroups/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Edit(FGroup fGroup)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Update(fGroup);
-                _context.SaveChanges();
-                return RedirectToAction("Index");
-            }
-            return View(fGroup);
-        }
-
-        // GET: FGroups/Delete/5
-        [ActionName("Delete")]
-        public IActionResult Delete(int? id)
-        {
-            if (id == null)
-            {
-                return HttpNotFound();
-            }
-
-            FGroup fGroup = _context.Groups.Single(m => m.ID == id);
-            if (fGroup == null)
-            {
-                return HttpNotFound();
-            }
-
-            return View(fGroup);
-        }
-
-        // POST: FGroups/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(int id)
-        {
-            FGroup fGroup = _context.Groups.Single(m => m.ID == id);
-            _context.Groups.Remove(fGroup);
-            _context.SaveChanges();
-            return RedirectToAction("Index");
+            var ti = _context.ForumTopic.Include(t => t.Post).Include(t => t.User).Include(u => u.User.ForumPost).Include(u => u.User.ForumTopic).Include(u => u.User.ForumUser).Single(s => s.ID == id);
+            ti.ViewCount++;
+            _forumManager.Update(ti);
+            return View(ti);
         }
     }
 }

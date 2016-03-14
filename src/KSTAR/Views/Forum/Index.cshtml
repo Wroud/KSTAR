@@ -1,7 +1,47 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+﻿@model List<FGroup>
+
+<div class="content-box content-breadcrumb">
+    @Component.Invoke("Breadcrumb")
+</div>
+
 <div class="content-box forum-container">
+
+    @foreach (var item in Model)
+    {
+        <div class="title">
+            <h4>
+                @Html.DisplayFor(modelItem => item.Title)
+                <br />
+                <small>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </small>
+            </h4>
+        </div>
+        @if (item.Subjects != null)
+        {
+            foreach (var sub in item.Subjects)
+            {
+                <div class="forum-subject">
+                    <div class="icon">
+                        @Html.Raw(sub.Icon)
+                    </div>
+                    <div class="info">
+                        <div class="info-count">
+                            <span>@sub.Topics.Sum(t => t.ViewCount)</span>
+                            <span>Просмотров</span>
+                        </div>
+                        <div class="info-count">
+                            <span>@sub.Topics.Count</span>
+                            <span>Тем</span>
+                        </div>
+                        <div class="info-count">
+                            <span>@sub.Topics.Sum(t => t.Post.Count)</span>
+                            <span>Сообщений</span>
+                        </div>
+                    </div>
+                    <h4><a href="/Forum/@sub.Title">@sub.Title</a><br /><small>@sub.Description</small></h4>
+                </div>
+            }
+        }
+    }
 </div>

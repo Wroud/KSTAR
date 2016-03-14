@@ -1,0 +1,35 @@
+﻿@model List<FTopic>
+
+<div class="content-box content-breadcrumb">
+    <a class="btn btn-default btn-sm pull-right">Добавить тему</a>
+    @Component.Invoke("Breadcrumb")
+</div>
+
+<div class="content-box forum-container">
+
+    @foreach (var item in Model)
+    {
+        <div class="forum-subject">
+            <div class="icon">
+                <i class="glyphicon glyphicon-comment"></i>
+            </div>
+            <div class="info">
+                <div class="info-count">
+                    <span>@item.ViewCount</span>
+                    <span>Просмотров</span>
+                </div>
+                <div class="info-count">
+                    <span>@item.Post.Count</span>
+                    <span>Сообщений</span>
+                </div>
+            </div>
+            <h4><a href="/Forum/@item.Subject.Title/@item.ID">@item.Title</a><br /><small>@item.Description</small></h4>
+            <div class="meta">
+                <i class="fa fa-user"></i> <a>@item.User.UserName</a>
+                <i class="fa fa-comments-o"></i> @item.Post.Count
+                <i class="fa fa-eye"></i> @item.ViewCount
+                <i class="fa fa-calendar"></i> @item.Date
+            </div>
+        </div>
+    }
+</div>
